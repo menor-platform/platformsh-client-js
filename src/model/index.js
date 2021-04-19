@@ -38,6 +38,7 @@ import PaymentSource from "./PaymentSource";
 import Voucher from "./Voucher";
 import Invitation from "./Invitation";
 import OrganizationSubscription from "./OrganizationSubscription";
+import OrganizationMember from "./OrganizationMember";
 
 export default {
   Account,
@@ -79,5 +80,6 @@ export default {
   TicketCategory,
   Voucher,
   Invitation,
-  OrganizationSubscription
+  OrganizationSubscription,
+  OrganizationMember
 };
