@@ -453,15 +453,53 @@ describe("Client", () => {
     });
   });
 
-  it("Get organizations", done => {
-    fetchMock.mock("https://api.platform.sh/api/organizations", [
+  it("Get organization subscription estimate", done => {
+    fetchMock.mock(
+      `${api_url}/organizations/aliceorg/subscriptions/estimate?plan=plan&storage=storage&environments=environments&user_licenses=users`,
       {
-        id: "1",
-        name: "org1",
-        label: "the organization",
-        owner: "10"
+        key: "value"
       }
-    ]);
+    );
+    client
+      .getOrganizationSubscriptionEstimate(
+        "aliceorg",
+        "plan",
+        "storage",
+        "environments",
+        "users"
+      )
+      .then(estimate => {
+        assert.equal(estimate.key, "value");
+        done();
+      });
+  });
+
+  it("Get current deployment informations", done => {
+    fetchMock.mock(
+      "https://api.platform.sh/api/projects/ffzefzef3/environments/1/deployments/current",
+      {
+        webapps: {
+          php: {}
+        }
+      }
+    );
+    client.getCurrentDeployment("ffzefzef3", "1").then(deployment => {
+      assert.equal(deployment.constructor.name, "Deployment");
+      done();
+    });
+  });
+
+  it("Get organizations", done => {
+    fetchMock.mock("https://api.platform.sh/api/organizations", {
+      items: [
+        {
+          id: "1",
+          name: "org1",
+          label: "the organization",
+          owner: "10"
+        }
+      ]
+    });
     client.getOrganizations().then(organizations => {
       assert.equal(organizations[0].id, "1");
       assert.equal(organizations[0].name, "org1");
@@ -635,6 +673,72 @@ describe("Client", () => {
     });
   });
 
+  it("Get organization orders", done => {
+    fetchMock.mock(
+      `${api_url}/organizations/aliceorgid/orders?filter[owner]=1`,
+      {
+        items: [
+          {
+            id: "803635",
+            status: "recurring_open",
+            owner: "126517",
+            address: {
+              country: "FR",
+              administrative_area: "",
+              sub_administrative_area: null,
+              locality: "Montpellier",
+              dependent_locality: "",
+              postal_code: "34000",
+              thoroughfare: "256 rue de Thor",
+              premise: "",
+              sub_premise: null,
+              organisation_name: null,
+              name_line: "Yann Autissier",
+              first_name: "Yann",
+              last_name: "Autissier",
+              data: null
+            },
+            vat_number: null,
+            billing_period_start: "1525125600",
+            billing_period_end: "1527803999",
+            total: 4.23,
+            components: {
+              base_price: {
+                display_title: "Subtotal",
+                amount: 13.53,
+                currency: "EUR"
+              },
+              "vat|fr_standard|20_2014": {
+                display_title: "20% VAT",
+                amount: 0.7,
+                currency: "EUR"
+              },
+              voucher: {
+                display_title: "Voucher",
+                amount: -10,
+                currency: "EUR"
+              }
+            },
+            currency: "EUR",
+            invoice_url: null
+          }
+        ],
+        count: 57593,
+        _links: {
+          self: {
+            title: "Self",
+            href: "http://accounts.psh.local/api/platform/orders"
+          }
+        }
+      }
+    );
+    client.getOrganizationOrders("aliceorgid", "1").then(orders => {
+      assert.equal(orders.length, 1);
+      assert.equal(orders[0].constructor.name, "OrganizationOrder");
+      done();
+    });
+  });
+
   it("Get order", done => {
     fetchMock.mock(
       `${api_url}/v1/orders/1`,
@@ -695,6 +799,70 @@ describe("Client", () => {
     client.getOrder("1").then(order => {
       assert.equal(order.id, "31619");
       assert.equal(order.constructor.name, "Order");
+      done();
+    });
+  });
+
+  it("Get organization order", done => {
+    fetchMock.mock(
+      `${api_url}/organizations/aliceorgid/orders/1`,
+      JSON.stringify({
+        id: "31619",
+        status: "invoiced",
+        owner: "29164",
+        address: {
+          country: "US",
+          administrative_area: "TX",
+          sub_administrative_area: null,
+          locality: "Belton",
+          dependent_locality: "",
+          postal_code: "76513",
+          thoroughfare: "15 E. Wichita Ln.",
+          premise: "",
+          sub_premise: null,
+          organisation_name: null,
+          name_line: "Nicholas Vahalik",
+          first_name: "Nicholas",
+          last_name: "Vahalik",
+          data: null
+        },
+        vat_number: null,
+        billing_period_start: "1448924400",
+        billing_period_end: "1451602799",
+        total: 10,
+        components: {
+          base_price: {
+            display_title: "Subtotal",
+            amount: 10,
+            currency: "USD"
+          }
+        },
+        currency: "USD",
+        invoice_url: "http://accounts.psh.local/invoices/11959/pdf",
+        line_items: [
+          {
+            project: "Schulman Theatres",
+            product: "Development",
+            start: "1448924400",
+            end: "1451602799",
+            quantity: "1.00",
+            unit_price: 10,
+            total_price: 10,
+            components: {
+              base_price: {
+                display_title: "Subtotal",
+                amount: 10,
+                currency: "USD"
+              }
+            }
+          }
+        ]
+      })
+    );
+
+    client.getOrganizationOrder("aliceorgid", "1").then(order => {
+      assert.equal(order.id, "31619");
+      assert.equal(order.constructor.name, "OrganizationOrder");
       done();
     });
   });
@@ -877,6 +1045,24 @@ describe("Client", () => {
         assert.equal(member.constructor.name, "OrganizationMember");
         done();
       });
+    });
+  });
+  describe("Organization payment", done => {
+    it("Create payment intent", done => {
+      fetchMock.mock(
+        `${api_url}/organizations/aliceOrgId/payment_source/intent`,
+        {
+          id: "alice"
+        },
+        "POST"
+      );
+      client
+        .createOrganizationPaymentSourceIntent("aliceOrgId")
+        .then(intent => {
+          assert.equal(intent.id, "alice");
+          // assert.equal(intent.constructor.name, "OrganizationPaymentSource");
+          done();
+        });
     });
   });
 });

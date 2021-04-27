@@ -29,12 +29,12 @@ const availablePlans = ["development", "standard", "medium", "large"];
 const availableRegions = ["eu.platform.sh", "us.platform.sh"];
 
 export default class Subscription extends Ressource {
-  constructor(subscription) {
+  constructor(subscription, customUrl) {
     const { id } = subscription;
     const { api_url } = getConfig();
 
     super(
-      `${api_url}${url}`,
+      customUrl || `${api_url}${url}`,
       paramDefaults,
       { id },
       subscription,
@@ -42,7 +42,7 @@ export default class Subscription extends Ressource {
       modifiableField
     );
 
-    this._queryUrl = Ressource.getQueryUrl(`${api_url}${url}`);
+    this._queryUrl = Ressource.getQueryUrl(customUrl || `${api_url}${url}`);
     this._required = ["project_region"];
     this.id = "";
     this.status = "";
@@ -130,7 +130,7 @@ export default class Subscription extends Ressource {
     const errors = {};
 
     if (property === "storage" && value < 1024) {
-      errors[property] = "Storage must be at least 1024 MiB";
+      errors[property] = "Surltorage must be at least 1024 MiB";
     } else if (property === "activation_callback") {
       if (!value.uri) {
         errors[property] = "A 'uri' key is required in the activation callback";
