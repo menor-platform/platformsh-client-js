@@ -383,4 +383,9 @@ export default class Ressource {
   hasPermission(permission) {
     return this.data._links && !!this.data._links[permission];
   }
+
+  async getRef(linkKey, constructor) {
+    const obj = await request(this.getLink(linkKey));
+    return new constructor(obj);
+  }
 }
