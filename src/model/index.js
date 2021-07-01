@@ -17,6 +17,7 @@ import Route from "./Route";
 import Variable from "./Variable";
 import Deployment from "./Deployment";
 import Organization from "./Organization";
+import SourceOperation from "./SourceOperation";
 import Team from "./Team";
 import Ticket from "./Ticket";
 import TicketPriority from "./TicketPriority";
@@ -58,6 +59,7 @@ export default {
   ProjectAccess,
   ProjectLevelVariable,
   Route,
+  SourceOperation,
   Variable,
   Deployment,
   Organization,

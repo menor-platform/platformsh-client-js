@@ -315,6 +315,20 @@ export default class Client {
   }
 
   /**
+   * Get the source operations available in an environment
+   *
+   * @param string projectId
+   * @param string environmentId
+   * @param string projectId
+   *
+   * @return Promise SourceOperations[]
+   */
+  getEnvironmentSourceOperations(projectId, environmentId) {
+    console.debug("platform client", entities)
+    return entities.SourceOperation.query({ projectId, environmentId });
+  }
+
+  /**
    * Get the logged-in user's SSH keys.
    *
    * @param bool reset
@@ -822,9 +836,9 @@ export default class Client {
       return typeof data === "undefined"
         ? undefined
         : Object.entries(data).reduce((items, [key, value]) => {
-            items[key] = new entities.SetupRegistry(value);
-            return items;
-          }, {});
+          items[key] = new entities.SetupRegistry(value);
+          return items;
+        }, {});
     });
   }
 
@@ -859,9 +873,9 @@ export default class Client {
       return typeof data === "undefined"
         ? undefined
         : Object.entries(data).reduce((items, [key, value]) => {
-            items[key] = new entities.SetupRegistry(value);
-            return items;
-          }, {});
+          items[key] = new entities.SetupRegistry(value);
+          return items;
+        }, {});
     });
   }
 
